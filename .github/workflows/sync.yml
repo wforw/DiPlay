@@ -12,16 +12,23 @@ jobs:
     runs-on: ubuntu-latest
     name: Sync latest commits from upstream repo
 
+    # 赋予工作流写入仓库代码的权限
+    permissions:
+      contents: write
+
     steps:
     - name: Checkout target repo
       uses: actions/checkout@v4
       with:
-        ref: main # 注意：如果你 Fork 的默认分支是 master，请改为 master
+        fetch-depth: 0 # 拉取完整提交历史，防止 merge/rebase 出现浅克隆错误
 
-    - name: Sync upstream changes
-      uses: a2ren/fork-sync-upstream-action@v1.0.0
-      with:
-        upstream_repository: 'shihabal3amri/DiPlay'
-        upstream_branch: 'main' # 原仓库的主分支名称（如果是 master 请改成 master）
-        target_branch: 'main'   # 你的 Fork 仓库的目标分支
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Sync upstream changes using GitHub CLI
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # 配置 Git 提交身份
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # 使用 GitHub CLI 直接将上游仓库的 main 分支同步到本地
+        gh repo sync ${{ github.repository }} -b main --source shihabal3amri/DiPlay
