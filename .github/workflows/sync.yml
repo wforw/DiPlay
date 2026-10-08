@@ -1,10 +1,10 @@
-name: Auto Sync Upstream
+name: Sync Upstream
 
 on:
   schedule:
-    # 每天 UTC 时间 0:00（北京时间上午 8:00）自动运行一次
+    # 每天 UTC 0:00 (北京时间 8:00) 自动运行一次
     - cron: '0 0 * * *'
-  # 支持在 GitHub 页面手动点击触发同步
+  # 允许在 GitHub Actions 页面手动点击触发同步
   workflow_dispatch:
 
 jobs:
@@ -16,12 +16,12 @@ jobs:
     - name: Checkout target repo
       uses: actions/checkout@v4
       with:
-        ref: main # 注意：如果原仓库默认分支是 master，请把这里的 main 改为 master
+        ref: main # 注意：如果你 Fork 的默认分支是 master，请改为 master
 
     - name: Sync upstream changes
-      uses: aレ/git-sync@v2
+      uses: a2ren/fork-sync-upstream-action@v1.0.0
       with:
-        upstream_repo: "https://github.com/shihabal3amri/DiPlay.git"
-        upstream_branch: "main" # 注意：如果原仓库主分支是 master，请改成 master
-        target_branch: "main"
+        upstream_repository: 'shihabal3amri/DiPlay'
+        upstream_branch: 'main' # 原仓库的主分支名称（如果是 master 请改成 master）
+        target_branch: 'main'   # 你的 Fork 仓库的目标分支
         github_token: ${{ secrets.GITHUB_TOKEN }}
