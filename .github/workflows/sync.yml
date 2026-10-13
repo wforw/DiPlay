@@ -2,9 +2,7 @@ name: Sync Upstream
 
 on:
   schedule:
-    # 每天 UTC 0:00 (北京时间 8:00) 自动运行一次
     - cron: '0 0 * * *'
-  # 允许在 GitHub Actions 页面手动点击触发同步
   workflow_dispatch:
 
 jobs:
@@ -12,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Sync latest commits from upstream repo
 
-    # 赋予工作流写入仓库代码的权限
     permissions:
       contents: write
 
@@ -20,15 +17,19 @@ jobs:
     - name: Checkout target repo
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # 拉取完整提交历史，防止 merge/rebase 出现浅克隆错误
+        fetch-depth: 0
 
-    - name: Sync upstream changes using GitHub CLI
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pull upstream changes
       run: |
-        # 配置 Git 提交身份
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        # 使用 GitHub CLI 直接将上游仓库的 main 分支同步到本地
-        gh repo sync ${{ github.repository }} -b main --source shihabal3amri/DiPlay
+        # 添加上游仓库地址
+        git remote add upstream https://github.com/shihabal3amri/DiPlay.git
+        git fetch upstream
+        
+        # 尝试合并上游的 main 分支
+        git merge upstream/main --allow-unrelated-histories -m "Auto-sync with upstream" || true
+        
+        # 推送回你自己的仓库
+        git push origin main
