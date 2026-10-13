@@ -24,12 +24,16 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        # 添加上游仓库地址
+        # 添加上游仓库并拉取
         git remote add upstream https://github.com/shihabal3amri/DiPlay.git
         git fetch upstream
         
         # 尝试合并上游的 main 分支
         git merge upstream/main --allow-unrelated-histories -m "Auto-sync with upstream" || true
         
-        # 推送回你自己的仓库
+        # 核心：恢复本地的 workflow 文件，避免触发权限拒绝错误
+        git checkout HEAD -- .github/workflows/ || true
+        git reset .github/workflows/ || true
+        
+        # 推送更新到自己的仓库
         git push origin main
